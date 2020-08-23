@@ -1,0 +1,6 @@
+*.pyc
+__pycache__
+main
+map.html
+config.go
+config.py
