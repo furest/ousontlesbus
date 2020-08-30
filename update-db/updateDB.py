@@ -26,7 +26,7 @@ def getLastUpdate():
                     WHERE Id = 1""")
     lastUpdate = curs.fetchone()
     if lastUpdate is not None:
-    lastUpdate = lastUpdate['lastUpdate']
+        lastUpdate = lastUpdate['lastUpdate']
     return lastUpdate
 
 def getLastGTFS(url):
