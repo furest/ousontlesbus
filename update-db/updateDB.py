@@ -21,10 +21,11 @@ def getLastUpdate():
     """
     Check in the database the date of the last update
     """
-    curs.execute("""SELECT lastUpdate 
+    curs.execute("""SELECT lastUpdate
                     FROM TEC.meta
                     WHERE Id = 1""")
     lastUpdate = curs.fetchone()
+    if lastUpdate is not None:
     lastUpdate = lastUpdate['lastUpdate']
     return lastUpdate
 
@@ -40,7 +41,7 @@ def getLastGTFS(url):
     GTFSdatetime = datetime.datetime.strptime(GTFSLast, '%a, %d %b %Y %H:%M:%S GMT')
     return GTFSdatetime
 
-def downloadFile(url, filename): 
+def downloadFile(url, filename):
     #Downloads the TEC-GTFS file
     GTFSfile = requests.get(url, stream=True)
     with open(filename, "wb") as f:
@@ -68,7 +69,7 @@ if __name__ == '__main__':
     lastUpdate = getLastUpdate()
     print("Last gtfs timestamp :",lastGTFS)
     print("Last update timestamp :", lastUpdate)
-    if lastGTFS < lastUpdate:
+    if lastUpdate is not None and lastGTFS < lastUpdate:
         print("Database already up to date")
         sys.exit(0)
     print("Updating database...")
