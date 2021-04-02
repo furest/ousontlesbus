@@ -53,7 +53,7 @@ def bus(bus_id):
                continue
            if not detail.find(alt="status",src=re.compile("/A.png$")):
                 continue
-           license_plate = bus.find("span", class_="kenteken")
+           license_plate = detail.find("span", class_="kenteken")
            href = detail.find("a").get("href")
            return jsonify(license_plate=license_plate.text, link="https://www.zone01.be"+str(href))
     abort(404, "Bus ID not found")
