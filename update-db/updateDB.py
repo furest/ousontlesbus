@@ -88,7 +88,7 @@ if __name__ == '__main__':
     files.append("trip_times")
     for filename in files:
         migrateTable(filename)
-    curs.execute("UPDATE " + config['DB_MAIN'] + ".meta SET lastUpdate = %s WHERE id = 1", (datetime.datetime.now(),))
+    curs.execute("INSERT INTO " + config['DB_MAIN'] + ".meta VALUES (1,%s) ON DUPLICATE KEY UPDATE lastUpdate = %s", (datetime.datetime.now(),datetime.datetime.now()))
     db.commit()
     os.unlink(config['ZIP_NAME'])
     shutil.rmtree(config['UNZIP_FOLDER'])
