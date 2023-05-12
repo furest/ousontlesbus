@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 	"text/template"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/valyala/fastjson"
@@ -114,9 +115,10 @@ func createMap(mapID string, markers string, center Position) (string, error) {
 }
 
 func queryTrips(tripIDs []string, c chan []Trip) {
-
+	t := time.Now()
 	request := map[string]interface{}{
 		"complete": true,
+		"datetime": t.Format("2006-01-02 15:04:05"),
 		"trip_ids": tripIDs,
 	}
 	strReq, _ := json.Marshal(request)
