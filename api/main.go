@@ -218,7 +218,7 @@ func getFindplate(c *gin.Context) {
 }
 
 func main() {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(GIN_MODE)
 	router := gin.Default()
 	router.SetTrustedProxies(TRUSTED_PROXIES)
 	router.Use(Database())
@@ -226,5 +226,5 @@ func main() {
 	router.GET("/livetrips", getLiveTrips)
 	router.GET("/findplate/:id", getFindplate)
 
-	router.Run("127.0.0.1:8080")
+	router.Run(LISTEN_ADDR + ":" + LISTEN_PORT)
 }
