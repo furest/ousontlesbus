@@ -1,5 +1,5 @@
 config = dict()
-config['URL'] = "http://opendata.tec-wl.be/Current%20GTFS/TEC-GTFS.zip"
+config['URL'] = "https://opendata.tec-wl.be/Current%20GTFS/TEC-GTFS.zip"
 config['ZIP_NAME'] = "TEC-GTFS.zip"
 config['UNZIP_FOLDER'] = "TEC-GTFS"
 config['DB_HOSTNAME'] = "localhost"
