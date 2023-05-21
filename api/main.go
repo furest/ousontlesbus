@@ -218,9 +218,9 @@ func getFindplate(c *gin.Context) {
 }
 
 func main() {
-	//gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.ReleaseMode)
 	router := gin.Default()
-	router.SetTrustedProxies([]string{"127.0.0.1", "::1"})
+	router.SetTrustedProxies(TRUSTED_PROXIES)
 	router.Use(Database())
 	router.GET("/trips", getTrips)
 	router.GET("/livetrips", getLiveTrips)
