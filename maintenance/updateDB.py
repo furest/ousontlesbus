@@ -1,3 +1,4 @@
+#!/bin/env python3
 import requests
 import mysql.connector
 import datetime
@@ -53,7 +54,7 @@ def unzipFile(filename, folder):
         GTFSzip.extractall(folder)
 
 def loadCSV(filename, folder):
-    os.system("""mysql -h%s -u%s -p%s "%s" -e "LOAD DATA LOCAL INFILE '%s/%s.txt' INTO TABLE %s FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES; COMMIT;" """ % (config['DB_HOSTNAME'],config['DB_USER'], config['DB_PASSWORD'],config['DB_TMP'],folder,filename, filename))
+    os.system("""mysql -h%s -u%s -p%s "%s" -e "LOAD DATA LOCAL INFILE '%s/%s.txt' INTO TABLE %s FIELDS TERMINATED BY ',' ENCLOSED BY '\\"' LINES TERMINATED BY '\r\n' IGNORE 1 LINES; COMMIT;" """ % (config['DB_HOSTNAME'],config['DB_USER'], config['DB_PASSWORD'],config['DB_TMP'],folder,filename, filename))
 
 def emptyTable(tableName):
     curs.execute("DELETE FROM " + tableName)
