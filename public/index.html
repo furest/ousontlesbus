@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script>L_PREFER_CANVAS = false; L_NO_TOUCH = false; L_DISABLE_3D = false;</script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+    <style>
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            left: 0;
+        }
+    </style>
+
+    <meta name="viewport" content="width=device-width,
+        initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <style>
+        #tecmap {
+            position: relative;
+            width: 100.0%;
+            height: 100.0%;
+            left: 0.0%;
+            top: 0.0%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="folium-map" id="tecmap"></div>
+</body>
+<script>
+    var bounds = null;
+    var tecmap = L.map(
+        'tecmap', {
+        center: [50.2296, 5.3586],
+        zoom: 9,
+        maxBounds: bounds,
+        layers: [],
+        worldCopyJump: false,
+        crs: L.CRS.EPSG3857,
+        zoomControl: true,
+    });
+    var tile_layer_4470f99ad59d4750a81c088ee7e8d995 = L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {
+            "attribution": null,
+            "detectRetina": false,
+            "maxNativeZoom": 18,
+            "maxZoom": 18,
+            "minZoom": 0,
+            "noWrap": false,
+            "opacity": 1,
+            "subdomains": "abc",
+            "tms": false
+        }).addTo(tecmap);
+
+    var colorMap = {
+        "L": "red",
+        "B": "blue",
+        "H": "green",
+        "C": "orange",
+        "X": "purple",
+        "N": "gray",
+    }
+
+
+    fetch('http://localhost:8080/livetrips').then(
+        function (response) {
+            if (response.status !== 200) {
+                console.log('Failed querying live trips. Status Code: ' + response.status);
+                return;
+            }
+            response.json().then(
+                function (livetrips) {
+                    livetrips.forEach((v, k) => {
+                        /*
+                        type Trip struct {
+                        ID             string `json:"id"`
+                        BeginTime      string `json:"beginTime"`
+                        EndTime        string `json:"endTime"`
+                        RouteID        string `json:"routeID"`
+                        RouteShortName string `json:"routeShortName"`
+                        RouteLongName  string `json:"routeLongName"`
+                    }
+
+                    type LiveTrip struct {
+                        Trip       Trip    `json:"trip"`
+                        Latitude   float64 `json:"latitude"`
+                        Longitude  float64 `json:"longitude"`
+                        VehiculeID string  `json:"vehiculeID"`
+                        Speed      float64 `json:"speed"`
+                    }*/
+                        var marker = L.marker(
+                            [v.latitude, v.longitude],
+                            {
+                                icon: new L.Icon.Default(),
+                            }
+                        ).addTo(tecmap);
+
+                        var icon = L.AwesomeMarkers.icon({
+                            icon: 'bus',
+                            iconColor: 'white',
+                            markerColor: colorMap[v.trip.routeID[0]],
+                            prefix: 'fa',
+                            extraClasses: 'fa-rotate-0'
+                        });
+                        marker.setIcon(icon);
+                        marker.busID = v.vehiculeID
+                        marker.routeID = v.trip.routeID
+                        marker.routeName = v.trip.routeShortName + " " + v.trip.routeLongName
+                        marker.lineCode = marker.routeID.split("-")[0]
+                        while (marker.lineCode[1] == 0) {
+                            marker.lineCode = marker.lineCode[0] + marker.lineCode.slice(2)
+                        }
+                        var popup = L.popup({ maxWidth: 300 });
+
+                        var popupContent = `<div id="` + marker.busID + `" style="width: 100.0%; height: 100.0%;">Bus n : <span id="vehicleID">` + marker.busID + `</span><br/>Ligne : <a href="https://www.letec.be/#/Planning/Details/Line/` + marker.routeName.replaceAll("/","-") + `/` + marker.lineCode + `" target="_blank"> ` + marker.routeID + `</a></div>`
+                        popup.setContent(popupContent);
+
+                        marker.bindPopup(popup);
+                        marker.on('click', function (e) {
+                            var marker = e.target
+                            var popup = marker.getPopup();
+                            if (!popup.isOpen())
+                                return;
+                            fetch('http://localhost:8080/findplate/' + marker.busID).then(function (resp) {
+                                if (resp.status != 200)
+                                    return
+                                resp.json().then((content) => {
+                                    var newhtml = `<div id="` + marker.busID + `" style="width: 100.0%; height: 100.0%;">Bus n : <span id="vehicleID"><a href="` + content.link + `"> ` + marker.busID + `</a></span><br/>Ligne : <a href="https://www.letec.be/#/Planning/Details/Line/` + marker.routeName.replaceAll("/","-") + `/` + marker.lineCode + `" target="_blank"> ` + marker.routeID + `</a><br/>Plaque : ` + content.license_plate + `</div>`
+                                    popup.setContent(newhtml);
+                                });
+                            });
+
+                        });
+                    });
+                }
+            )
+        }
+    )
+
+
+</script>

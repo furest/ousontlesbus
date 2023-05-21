@@ -1,7 +1,10 @@
 *.pyc
+.vscode
 __pycache__
 main
 main_arm64
 map.html
 config.go
 config.py
+go.mod
+go.sum
