@@ -1,0 +1,12 @@
+[Unit]
+Description=Golang api to query OTW Busses location
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/ousontlesbus/api/
+ExecStart=/var/www/ousontlesbus/api/main
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
