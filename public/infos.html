@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+    <style>
+        table, th, td {
+           border: 1px solid;
+           border-collapse: collapse;
+        }
+    </style>
+    <div id="infos">
+        </div>
+    <table>
+        <thead>
+            <tr>
+                <th>trip_id</th>
+                <th>begin_time</th>
+                <th>end_time</th>
+                <th>route_id</th>
+                <th>route_short_name</th>
+                <th>route_long_name</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
+    <script>
+        fetch('/api/trips').then((response) => {
+            if (response.status !== 200) {
+                console.log('Failed querying live trips. Status Code: ' + response.status);
+                return;
+            }
+            response.json().then(
+                (trips) => {
+                    tbody = document.getElementById("tbody")
+                    document.getElementById("infos").innerHTML = "Bus actuellement en circulation: " + trips.length + "</br>"
+                    trips.forEach(trip => {
+                        row = tbody.insertRow()
+                        row.insertCell().innerHTML = trip.id
+                        row.insertCell().innerHTML = trip.beginTime
+                        row.insertCell().innerHTML = trip.endTime
+                        row.insertCell().innerHTML = trip.routeID
+                        row.insertCell().innerHTML = trip.routeShortName
+                        row.insertCell().innerHTML = trip.routeLongName
+                    });
+            })
+        });
+    </script>
+</body>
