@@ -73,23 +73,31 @@ if __name__ == '__main__':
     if lastUpdate is not None and lastGTFS < lastUpdate:
         print("Database already up to date")
         sys.exit(0)
-    print("Updating database...")
+    print("Will be updating database")
     os.chdir("/tmp")
+    print("Downloading GTFS Data")
     downloadFile(config['URL'], config['ZIP_NAME'])
+    print("Decompressing GTFS data")
     unzipFile(config['ZIP_NAME'], config['UNZIP_FOLDER'])
     files = ["calendar", "calendar_dates", "routes", "trips", "stop_times"]
     for filename in files:
+        print(f"Emptying {filename} first")
         emptyTable(filename)
         db.commit()
+        print(f"Importing {filename}")
         loadCSV(filename, config['UNZIP_FOLDER'])
         db.commit()
+    print("Emptying trip_times")
     emptyTable("trip_times")
+    print("Generating trip_times")
     curs.execute("INSERT INTO trip_times SELECT trip_id, min(arrival_time), max(departure_time) FROM stop_times GROUP BY trip_id")
     db.commit()
     files.append("trip_times")
     for filename in files:
+        print(f"Migrating {filename}")
         migrateTable(filename)
     curs.execute("INSERT INTO " + config['DB_MAIN'] + ".meta VALUES (1,%s) ON DUPLICATE KEY UPDATE lastUpdate = %s", (datetime.datetime.now(),datetime.datetime.now()))
     db.commit()
     os.unlink(config['ZIP_NAME'])
     shutil.rmtree(config['UNZIP_FOLDER'])
+
