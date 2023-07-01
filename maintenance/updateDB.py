@@ -77,7 +77,7 @@ if __name__ == '__main__':
     os.chdir("/tmp")
     downloadFile(config['URL'], config['ZIP_NAME'])
     unzipFile(config['ZIP_NAME'], config['UNZIP_FOLDER'])
-    files = ["calendar", "calendar_dates", "stop_times", "trips", "routes"]
+    files = ["calendar", "calendar_dates", "routes", "trips", "stop_times"]
     for filename in files:
         emptyTable(filename)
         db.commit()
