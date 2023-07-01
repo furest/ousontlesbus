@@ -45,7 +45,6 @@ func Database() gin.HandlerFunc {
 	db, err := sql.Open("mysql", DB_USER+":"+DB_PASS+"@tcp("+DB_ADDR+")/"+DB_DATABASE)
 	if err != nil {
 		log.Fatal(err)
-		panic(err)
 	}
 
 	return func(c *gin.Context) {
@@ -71,13 +70,15 @@ func queryTrips(tripMap map[string]Trip, c chan []LiveTrip) {
 	req.SetBasicAuth("public", "alamakota")
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 	bodyResp, err := ioutil.ReadAll(resp.Body)
 	var p fastjson.Parser
 	b, err := p.Parse(string(bodyResp))
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 	results := b.GetArray("result")
 	liveTrips := []LiveTrip{}
@@ -108,7 +109,9 @@ func getTrips(c *gin.Context) {
 	db := c.MustGet("DB").(*sql.DB)
 	rows, err := db.Query(SQL_REQUEST, 0, 0)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		c.AbortWithStatus(500)
+		return
 	}
 	defer rows.Close()
 	trips := make([]Trip, 0)
@@ -131,7 +134,9 @@ func getLiveTrips(c *gin.Context) {
 	db := c.MustGet("DB").(*sql.DB)
 	rows, err := db.Query(SQL_REQUEST, 0, 0)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		c.AbortWithStatus(500)
+		return
 	}
 	defer rows.Close()
 	//an array of maps containing Trip
@@ -180,12 +185,16 @@ func getFindplate(c *gin.Context) {
 	form.Add("submit", "Zoeken")
 	resp, err := http.PostForm(zone01URL, form)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		c.AbortWithStatus(500)
+		return
 	}
 	defer resp.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		c.AbortWithStatus(500)
+		return
 	}
 
 	table := doc.Find("#herculesdetails")
@@ -228,3 +237,4 @@ func main() {
 
 	router.Run(LISTEN_ADDR + ":" + LISTEN_PORT)
 }
+
