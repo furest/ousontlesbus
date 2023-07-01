@@ -84,7 +84,7 @@
     }
 
 
-    fetch('http://localhost:8080/livetrips').then(
+    fetch('/api/livetrips').then(
         function (response) {
             if (response.status !== 200) {
                 console.log('Failed querying live trips. Status Code: ' + response.status);
@@ -143,7 +143,7 @@
                             var popup = marker.getPopup();
                             if (!popup.isOpen())
                                 return;
-                            fetch('http://localhost:8080/findplate/' + marker.busID).then(function (resp) {
+                            fetch('/api/findplate/' + marker.busID).then(function (resp) {
                                 if (resp.status != 200)
                                     return
                                 resp.json().then((content) => {
