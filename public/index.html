@@ -161,7 +161,7 @@
                                         marker.setLatLng([content.latitude, content.longitude])
                                     })
                                 });
-                            });
+                            }, 5000);
                             marker.updateTimer = updateTimer
                             if (!popup.isOpen())
                                 return;
