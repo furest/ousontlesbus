@@ -127,6 +127,7 @@
                         marker.setIcon(icon);
                         marker.busID = v.vehiculeID
                         marker.routeID = v.trip.routeID
+                        marker.tripID = v.trip.id
                         marker.routeName = v.trip.routeShortName + " " + v.trip.routeLongName
                         marker.lineCode = marker.routeID.split("-")[0]
                         while (marker.lineCode[1] == 0) {
@@ -151,6 +152,13 @@
                                     popup.setContent(newhtml);
                                 });
                             });
+                            fetch('localhost:8099/tripshape/marker.').then(function (resp) {
+                                if (resp.status != 200)
+                                    return
+                                resp.json().then((content) => {
+                                    L.polyline(content).addTo(tecmap);
+                                })
+                            })
 
                         });
                     });

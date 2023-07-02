@@ -1,270 +1,174 @@
-USE TEC;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+  
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-DROP TABLE IF EXISTS agency;
+--
+-- Table structure for table `calendar`
+--
 
-CREATE TABLE `agency` (
-  agency_id CHAR(1) PRIMARY KEY,
-  agency_name VARCHAR(255),
-  agency_url VARCHAR(255),
-  agency_timezone VARCHAR(50),
-  agency_lang CHAR(2),
-  agency_phone VARCHAR(50)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS calendar;
-
+DROP TABLE IF EXISTS `calendar`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `calendar` (
-  service_id VARCHAR(64),
-  monday TINYINT(1),
-  tuesday TINYINT(1),
-  wednesday TINYINT(1),
-  thursday TINYINT(1),
-  friday TINYINT(1),
-  saturday TINYINT(1),
-  sunday TINYINT(1),
-  start_date DATE,
-  end_date DATE,
-  KEY `service_id` (service_id)
-)
-COLLATE 'utf8mb4_bin';
+  `service_id` varchar(128) NOT NULL,
+  `monday` tinyint(1) NOT NULL,
+  `tuesday` tinyint(1) NOT NULL,
+  `wednesday` tinyint(1) NOT NULL,
+  `thursday` tinyint(1) NOT NULL,
+  `friday` tinyint(1) NOT NULL,
+  `saturday` tinyint(1) NOT NULL,
+  `sunday` tinyint(1) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  PRIMARY KEY (`service_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS calendar_dates;
+--
+-- Table structure for table `calendar_dates`
+--
 
+DROP TABLE IF EXISTS `calendar_dates`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `calendar_dates` (
-  service_id VARCHAR(64),
-  `date` DATE,
-  exception_type INT(2),
-  KEY `service_id` (service_id),
-  KEY `exception_type` (exception_type)
-)
-COLLATE 'utf8mb4_bin';
+  `service_id` varchar(128) NOT NULL,
+  `date` date NOT NULL,
+  `exception_type` int(11) NOT NULL,
+  PRIMARY KEY (`service_id`,`date`),
+  CONSTRAINT `SERVICE_ID_FK_CALENDAR` FOREIGN KEY (`service_id`) REFERENCES `calendar` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS routes;
+--
+-- Table structure for table `meta`
+--
 
-CREATE TABLE `routes` (
-  route_id CHAR(11) PRIMARY KEY,
-  agency_id CHAR(1),
-  route_short_name VARCHAR(50),
-  route_long_name VARCHAR(255),
-  route_desc VARCHAR(255),
-  route_type INT(2),
-  route_url VARCHAR(255),
-  KEY `route_type` (route_type)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS shapes;
-
-CREATE TABLE `shapes` (
-  shape_id VARCHAR(50),
-  shape_pt_lat DECIMAL(9,6),
-  shape_pt_lon DECIMAL(9,6),
-  shape_pt_sequence INT(11),
-  KEY `shape_id` (shape_id)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS stop_times;
-
-CREATE TABLE `stop_times` (
-  trip_id VARCHAR(64),
-  arrival_time TIME,
-  departure_time TIME,
-  stop_id CHAR(8),
-  stop_sequence INT(11),
-  pickup_type INT(11),
-  drop_off_type INT(11),
-  KEY `trip_id` (trip_id),
-  KEY `stop_id` (stop_id),
-  KEY `stop_sequence` (stop_sequence)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS stops;
-
-CREATE TABLE `stops` (
-  stop_id CHAR(8) PRIMARY KEY,
-  stop_code VARCHAR(64),
-  stop_name VARCHAR(255),
-  stop_desc VARCHAR(255),
-  stop_lat DECIMAL(9,6),
-  stop_lon DECIMAL(9,6),
-  zone_id INT(11),
-  stop_url VARCHAR(255),
-  location_type INT(11),
-  KEY `stop_lat` (stop_lat),
-  KEY `stop_lon` (stop_lon)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS trips;
-
-CREATE TABLE `trips` (
-  route_id CHAR(11),
-  service_id VARCHAR(64),
-  trip_id VARCHAR(64) PRIMARY KEY,
-  trip_short_name VARCHAR(255),
-  direction_id TINYINT(1),
-  block_id INT(11),
-  shape_id VARCHAR(50),
-  KEY `route_id` (route_id),
-  KEY `service_id` (service_id),
-  KEY `direction_id` (direction_id),
-  KEY `shape_id` (shape_id)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS trip_times;
-CREATE TABLE `trip_times` (
-  trip_id VARCHAR(64),
-  begin_time TIME,
-  end_time TIME,
-  KEY `trip_id` (trip_id),
-  KEY `begin_time` (begin_time),
-  KEY `end_time` (end_time)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS meta;
+DROP TABLE IF EXISTS `meta`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `meta` (
-  id INT(11) PRIMARY KEY,
-  lastUpdate DATETIME
-)
-COLLATE 'utf8mb4_bin';
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `lastUpdate` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
+--
+-- Table structure for table `routes`
+--
 
-USE TEC_TMP;
-
-DROP TABLE IF EXISTS agency;
-
-CREATE TABLE `agency` (
-  agency_id CHAR(1) PRIMARY KEY,
-  agency_name VARCHAR(255),
-  agency_url VARCHAR(255),
-  agency_timezone VARCHAR(50),
-  agency_lang CHAR(2),
-  agency_phone VARCHAR(50)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS calendar;
-
-CREATE TABLE `calendar` (
-  service_id VARCHAR(64),
-  monday TINYINT(1),
-  tuesday TINYINT(1),
-  wednesday TINYINT(1),
-  thursday TINYINT(1),
-  friday TINYINT(1),
-  saturday TINYINT(1),
-  sunday TINYINT(1),
-  start_date DATE,
-  end_date DATE,
-  KEY `service_id` (service_id)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS calendar_dates;
-
-CREATE TABLE `calendar_dates` (
-  service_id VARCHAR(64),
-  `date` DATE,
-  exception_type INT(2),
-  KEY `service_id` (service_id),
-  KEY `exception_type` (exception_type)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS routes;
-
+DROP TABLE IF EXISTS `routes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `routes` (
-  route_id CHAR(11) PRIMARY KEY,
-  agency_id CHAR(1),
-  route_short_name VARCHAR(50),
-  route_long_name VARCHAR(255),
-  route_desc VARCHAR(255),
-  route_type INT(2),
-  route_url VARCHAR(255),
-  KEY `route_type` (route_type)
-)
-COLLATE 'utf8mb4_bin';
+  `route_id` varchar(12) NOT NULL,
+  `agency_id` char(1) NOT NULL,
+  `route_short_name` varchar(5) NOT NULL,
+  `route_long_name` varchar(128) NOT NULL,
+  `route_desc` varchar(256) NOT NULL,
+  `route_type` varchar(8) NOT NULL,
+  `route_url` varchar(256) NOT NULL,
+  PRIMARY KEY (`route_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS shapes;
 
+--
+-- Table structure for table `shapes`
+--
+
+DROP TABLE IF EXISTS `shapes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `shapes` (
-  shape_id VARCHAR(50),
-  shape_pt_lat DECIMAL(9,6),
-  shape_pt_lon DECIMAL(9,6),
-  shape_pt_sequence INT(11),
-  KEY `shape_id` (shape_id)
-)
-COLLATE 'utf8mb4_bin';
+  `shape_id` varchar(10),
+  `shape_pt_lat` DECIMAL(8,6) NOT NULL,
+  `shape_pt_long` DECIMAL(8,6) NOT NULL,
+  `shape_pt_sequence` int(11) NOT NULL,
+  PRIMARY KEY (`shape_id`,`shape_pt_sequence`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS stop_times;
 
-CREATE TABLE `stop_times` (
-  trip_id VARCHAR(64),
-  arrival_time TIME,
-  departure_time TIME,
-  stop_id CHAR(8),
-  stop_sequence INT(11),
-  pickup_type INT(11),
-  drop_off_type INT(11),
-  KEY `trip_id` (trip_id),
-  KEY `stop_id` (stop_id),
-  KEY `stop_sequence` (stop_sequence)
-)
-COLLATE 'utf8mb4_bin';
+--
+-- Table structure for table `trips`
+--
 
-DROP TABLE IF EXISTS stops;
-
-CREATE TABLE `stops` (
-  stop_id CHAR(8) PRIMARY KEY,
-  stop_code VARCHAR(64),
-  stop_name VARCHAR(255),
-  stop_desc VARCHAR(255),
-  stop_lat DECIMAL(9,6),
-  stop_lon DECIMAL(9,6),
-  zone_id INT(11),
-  stop_url VARCHAR(255),
-  location_type INT(11),
-  KEY `stop_lat` (stop_lat),
-  KEY `stop_lon` (stop_lon)
-)
-COLLATE 'utf8mb4_bin';
-
-DROP TABLE IF EXISTS trips;
-
+DROP TABLE IF EXISTS `trips`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `trips` (
-  route_id CHAR(11),
-  service_id VARCHAR(64),
-  trip_id VARCHAR(64) PRIMARY KEY,
-  trip_short_name VARCHAR(255),
-  direction_id TINYINT(1),
-  block_id INT(11),
-  shape_id VARCHAR(50),
-  KEY `route_id` (route_id),
-  KEY `service_id` (service_id),
-  KEY `direction_id` (direction_id),
-  KEY `shape_id` (shape_id)
-)
-COLLATE 'utf8mb4_bin';
+  `route_id` varchar(128) NOT NULL,
+  `service_id` varchar(128) NOT NULL,
+  `trip_id` varchar(128) NOT NULL,
+  `trip_short_name` varchar(128) NOT NULL,
+  `direction_id` tinyint(1) NOT NULL,
+  `block_id` int(11) NOT NULL,
+  `shape_id` varchar(10) NOT NULL,
+  PRIMARY KEY (`trip_id`),
+  KEY `ROUTE_ID_FK_ROUTE` (`route_id`),
+  KEY `TRIPS_SERVICE_ID_FK_CALENDAR` (`service_id`),
+  KEY `SHAPE_ID_FK_SHAPES` (`shape_id`),
+  CONSTRAINT `ROUTE_ID_FK_ROUTE` FOREIGN KEY (`route_id`) REFERENCES `routes` (`route_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `TRIPS_SERVICE_ID_FK_CALENDAR` FOREIGN KEY (`service_id`) REFERENCES `calendar` (`service_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `SHAPE_ID_FK_SHAPES` FOREIGN KEY (`shape_id`) REFERENCES `shapes` (`shape_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS trip_times;
+--
+-- Table structure for table `trip_times`
+--
+
+DROP TABLE IF EXISTS `trip_times`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `trip_times` (
-  trip_id VARCHAR(64),
-  begin_time TIME,
-  end_time TIME,
-  KEY `trip_id` (trip_id),
-  KEY `begin_time` (begin_time),
-  KEY `end_time` (end_time)
-)
-COLLATE 'utf8mb4_bin';
+  `trip_id` varchar(128) NOT NULL,
+  `begin_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  PRIMARY KEY (`trip_id`),
+  CONSTRAINT `TRIP_ID_FK_TRIPS` FOREIGN KEY (`trip_id`) REFERENCES `trips` (`trip_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-DROP TABLE IF EXISTS meta;
-CREATE TABLE `meta` (
-  id INT(11) PRIMARY KEY,
-  lastUpdate DATETIME
-)
-COLLATE 'utf8mb4_bin';
+--
+-- Table structure for table `stop_times`
+--
+
+DROP TABLE IF EXISTS `stop_times`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `stop_times` (
+  `trip_id` varchar(128) NOT NULL,
+  `arrival_time` time NOT NULL,
+  `departure_time` time NOT NULL,
+  `stop_id` varchar(128) NOT NULL,
+  `stop_sequence` int(11) NOT NULL,
+  `pickup_type` int(11) NOT NULL,
+  `drop_off_type` int(11) NOT NULL,
+  PRIMARY KEY (`trip_id`,`stop_sequence`),
+  CONSTRAINT `STOP_TRIP_ID_FK_TRIPS` FOREIGN KEY (`trip_id`) REFERENCES `trips` (`trip_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+

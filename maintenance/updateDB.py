@@ -79,7 +79,7 @@ if __name__ == '__main__':
     downloadFile(config['URL'], config['ZIP_NAME'])
     print("Decompressing GTFS data")
     unzipFile(config['ZIP_NAME'], config['UNZIP_FOLDER'])
-    files = ["calendar", "calendar_dates", "routes", "trips", "stop_times"]
+    files = ["calendar", "calendar_dates", "shapes", "routes", "trips", "stop_times"]
     for filename in files:
         print(f"Emptying {filename} first")
         emptyTable(filename)

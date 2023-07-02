@@ -128,6 +128,31 @@ func getTrips(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, trips)
 }
 
+//provides list of points to draw the shape of the trip
+func getTripShape(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	tripID := c.Param("trip_id")
+	db := c.MustGet("DB").(*sql.DB)
+	rows, err := db.Query("SELECT shape_pt_lat,shape_pt_long FROM shapes WHERE shape_id = (SELECT shape_id from trips WHERE trip_id = ?) ORDER BY shape_pt_sequence;", tripID)
+	if err != nil {
+		log.Print(err)
+		c.AbortWithStatus(500)
+		return
+	}
+	defer rows.Close()
+	pt_couple_arr := make([][]string, 0)
+	for rows.Next() {
+		var lat string
+		var long string
+		rows.Scan(&lat, &long)
+		point := make([]string, 2)
+		point[0] = lat
+		point[1] = long
+		pt_couple_arr = append(pt_couple_arr, point)
+	}
+	c.IndentedJSON(200, pt_couple_arr)
+}
+
 //Provides the list of all currently geolocated trips
 func getLiveTrips(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
@@ -175,6 +200,7 @@ func getLiveTrips(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, liveTrips)
 }
 
+//returns infos about the vehicule ID requested. Uses zone01.be.
 func getFindplate(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	busID := c.Param("id")
@@ -234,7 +260,7 @@ func main() {
 	router.GET("/trips", getTrips)
 	router.GET("/livetrips", getLiveTrips)
 	router.GET("/findplate/:id", getFindplate)
+	router.GET("/tripshape/:trip_id", getTripShape)
 
 	router.Run(LISTEN_ADDR + ":" + LISTEN_PORT)
 }
-
