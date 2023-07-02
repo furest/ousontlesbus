@@ -82,6 +82,7 @@
         "X": "purple",
         "N": "gray",
     }
+    var displayedPath = null;
 
 
     fetch('/api/livetrips').then(
@@ -139,6 +140,12 @@
                         popup.setContent(popupContent);
 
                         marker.bindPopup(popup);
+		        marker.on('popupclose', function(e) {
+			    if (displayedPath !== null) {
+				displayedPath.remove(tecmap);
+				displayedPath = null;
+			    }
+			});
                         marker.on('click', function (e) {
                             var marker = e.target
                             var popup = marker.getPopup();
@@ -152,11 +159,14 @@
                                     popup.setContent(newhtml);
                                 });
                             });
-                            fetch('localhost:8099/tripshape/marker.').then(function (resp) {
+                            fetch('/api/tripshape/'+marker.tripID).then(function (resp) {
                                 if (resp.status != 200)
                                     return
                                 resp.json().then((content) => {
-                                    L.polyline(content).addTo(tecmap);
+				    if (displayedPath !== null)
+				    	displayedPath.remove(tecmap);
+                                    displayedPath = L.polyline(content)
+				    displayedPath.addTo(tecmap);
                                 })
                             })
 
