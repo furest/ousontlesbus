@@ -154,7 +154,7 @@
                             var marker = e.target
                             var popup = marker.getPopup();
                             const updateTimer = setInterval(function () {
-                                fetch('/api/livetrip/' + marker.tripID).then(function (resp) {
+                                fetch('/api/updatetrip/' + marker.tripID).then(function (resp) {
                                     if (resp.status != 200)
                                         return
                                     resp.json().then((content) => {
