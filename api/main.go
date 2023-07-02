@@ -200,6 +200,22 @@ func getLiveTrips(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, liveTrips)
 }
 
+//Provides the list of all currently geolocated trips
+func getUpdateTrip(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", "*")
+	tripID := c.Param("trip_id")
+	ch := make(chan []LiveTrip)
+	tripsMap := make(map[string]Trip)
+	tripsMap[tripID] = Trip{ID: tripID, BeginTime: "", EndTime: "", RouteID: "", RouteShortName: "", RouteLongName: ""}
+	go queryTrips(tripsMap, ch)
+	livetrip := <-ch
+	if len(livetrip) == 0 {
+		c.AbortWithStatus(404)
+		return
+	}
+	c.IndentedJSON(http.StatusOK, livetrip[0])
+}
+
 //returns infos about the vehicule ID requested. Uses zone01.be.
 func getFindplate(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
@@ -259,6 +275,7 @@ func main() {
 	router.Use(Database())
 	router.GET("/trips", getTrips)
 	router.GET("/livetrips", getLiveTrips)
+	router.GET("/updatetrip/:trip_id", getUpdateTrip)
 	router.GET("/findplate/:id", getFindplate)
 	router.GET("/tripshape/:trip_id", getTripShape)
 

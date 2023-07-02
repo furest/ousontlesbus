@@ -136,37 +136,51 @@
                         }
                         var popup = L.popup({ maxWidth: 300 });
 
-                        var popupContent = `<div id="` + marker.busID + `" style="width: 100.0%; height: 100.0%;">Bus n : <span id="vehicleID">` + marker.busID + `</span><br/>Ligne : <a href="https://www.letec.be/#/Planning/Details/Line/` + marker.routeName.replaceAll("/","-") + `/` + marker.lineCode + `" target="_blank"> ` + marker.routeID + `</a></div>`
+                        var popupContent = `<div id="` + marker.busID + `" style="width: 100.0%; height: 100.0%;">Bus n : <span id="vehicleID">` + marker.busID + `</span><br/>Ligne : <a href="https://www.letec.be/#/Planning/Details/Line/` + marker.routeName.replaceAll("/", "-") + `/` + marker.lineCode + `" target="_blank"> ` + marker.routeID + `</a></div>`
                         popup.setContent(popupContent);
 
                         marker.bindPopup(popup);
-		        marker.on('popupclose', function(e) {
-			    if (displayedPath !== null) {
-				displayedPath.remove(tecmap);
-				displayedPath = null;
-			    }
-			});
+                        marker.on('popupclose', function (e) {
+                            var marker = e.target
+                            clearInterval(marker.updateTimer)
+                            marker.updateTimer = null
+                            if (displayedPath !== null) {
+                                displayedPath.remove(tecmap);
+                                displayedPath = null;
+                            }
+                            
+                        });
                         marker.on('click', function (e) {
                             var marker = e.target
                             var popup = marker.getPopup();
+                            const updateTimer = setInterval(function () {
+                                fetch('/api/livetrip/' + marker.tripID).then(function (resp) {
+                                    if (resp.status != 200)
+                                        return
+                                    resp.json().then((content) => {
+                                        marker.setLatLng([content.latitude, content.longitude])
+                                    })
+                                });
+                            });
+                            marker.updateTimer = updateTimer
                             if (!popup.isOpen())
                                 return;
                             fetch('/api/findplate/' + marker.busID).then(function (resp) {
                                 if (resp.status != 200)
                                     return
                                 resp.json().then((content) => {
-                                    var newhtml = `<div id="` + marker.busID + `" style="width: 100.0%; height: 100.0%;">Bus n : <span id="vehicleID"><a href="` + content.link + `"> ` + marker.busID + `</a></span><br/>Ligne : <a href="https://www.letec.be/#/Planning/Details/Line/` + marker.routeName.replaceAll("/","-") + `/` + marker.lineCode + `" target="_blank"> ` + marker.routeID + `</a><br/>Plaque : ` + content.license_plate + `</div>`
+                                    var newhtml = `<div id="` + marker.busID + `" style="width: 100.0%; height: 100.0%;">Bus n : <span id="vehicleID"><a href="` + content.link + `"> ` + marker.busID + `</a></span><br/>Ligne : <a href="https://www.letec.be/#/Planning/Details/Line/` + marker.routeName.replaceAll("/", "-") + `/` + marker.lineCode + `" target="_blank"> ` + marker.routeID + `</a><br/>Plaque : ` + content.license_plate + `</div>`
                                     popup.setContent(newhtml);
                                 });
                             });
-                            fetch('/api/tripshape/'+marker.tripID).then(function (resp) {
+                            fetch('/api/tripshape/' + marker.tripID).then(function (resp) {
                                 if (resp.status != 200)
                                     return
                                 resp.json().then((content) => {
-				    if (displayedPath !== null)
-				    	displayedPath.remove(tecmap);
+                                    if (displayedPath !== null)
+                                        displayedPath.remove(tecmap);
                                     displayedPath = L.polyline(content)
-				    displayedPath.addTo(tecmap);
+                                    displayedPath.addTo(tecmap);
                                 })
                             })
 
