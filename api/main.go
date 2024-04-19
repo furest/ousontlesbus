@@ -107,7 +107,14 @@ func queryTrips(tripMap map[string]Trip, c chan []LiveTrip) {
 func getTrips(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	db := c.MustGet("DB").(*sql.DB)
-	rows, err := db.Query(SQL_REQUEST, 0, 0)
+	sqlargs := []interface{}{0, 0}
+	line := c.Query("line")
+	_SQL_REQUEST := SQL_REQUEST
+	if line != "" {
+		_SQL_REQUEST += " WHERE r.route_id LIKE ?"
+		sqlargs = append(sqlargs, line+"%")
+	}
+	rows, err := db.Query(_SQL_REQUEST, sqlargs...)
 	if err != nil {
 		log.Print(err)
 		c.AbortWithStatus(500)
@@ -157,7 +164,14 @@ func getTripShape(c *gin.Context) {
 func getLiveTrips(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	db := c.MustGet("DB").(*sql.DB)
-	rows, err := db.Query(SQL_REQUEST, 0, 0)
+	sqlargs := []interface{}{0, 0}
+	line := c.Query("line")
+	_SQL_REQUEST := SQL_REQUEST
+	if line != "" {
+		_SQL_REQUEST += " WHERE r.route_id LIKE ?"
+		sqlargs = append(sqlargs, line+"%")
+	}
+	rows, err := db.Query(_SQL_REQUEST, sqlargs...)
 	if err != nil {
 		log.Print(err)
 		c.AbortWithStatus(500)
