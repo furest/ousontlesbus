@@ -20,7 +20,7 @@ import (
 )
 
 var apiURL = "https://tec-api.tapptic.com/api/trips/updates"
-var zone01URL = "https://www.zone01.be/hercules/resultaat_uitgebreid"
+var zone01URL = "https://www.zone01.be/hercules/resultaten"
 
 type Trip struct {
 	ID             string `json:"id"`
@@ -221,16 +221,24 @@ func getFindplate(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", "*")
 	busID := c.Param("id")
 	form := url.Values{}
-	form.Add("owner", "OTW")
-	form.Add("busnr", busID)
-	form.Add("status", "A")
-	form.Add("submit", "Zoeken")
-	resp, err := http.PostForm(zone01URL, form)
+	form.Add("q", busID)
+	req, err := http.NewRequest("GET", zone01URL, nil)
 	if err != nil {
 		log.Print(err)
 		c.AbortWithStatus(500)
 		return
 	}
+	query := req.URL.Query()
+	if len(busID) > 4 {
+		query.Add("q", busID)
+	} else {
+		query.Add("q", "OTW "+busID)
+	}
+
+	req.URL.RawQuery = query.Encode()
+
+	resp, _ := http.DefaultClient.Do(req)
+
 	defer resp.Body.Close()
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
@@ -245,26 +253,44 @@ func getFindplate(c *gin.Context) {
 		return
 	}
 
-	rows := table.Find("tr")
-	totalLen := rows.Length()
-	rows.EachWithBreak(func(i int, s *goquery.Selection) bool {
-		owner := s.Find(".owners").Text()
-		busNr := s.Find(".busnr").Text()
-		licensePlate := s.Find(".kenteken").Text()
-		link, _ := s.Find("a").Attr("href")
-		if strings.Contains(owner, "OTW") && busNr == busID {
+	//Loop on the lines containing busses and each of their affectation
+	table.EachWithBreak(func(i int, s *goquery.Selection) bool {
+		vehicle := s
+		affectations := vehicle.Find("tr")
+		found := false
+		affectations.EachWithBreak(func(i2 int, s2 *goquery.Selection) bool {
+			owner := s2.Find(".owners").Text()
+			busNr := s2.Find(".busnr").Text()
+			licensePlate := s2.Find(".kenteken").Text()
+			link, _ := s2.Find("a").Attr("href")
+			status, _ := s2.Find("img").Attr("src")
+			if !strings.Contains(status, "/A.png") {
+				return true //Affectation is not in service anymore
+			}
+			if busNr != busID {
+				return true //Bus ID is not correct
+			}
+			if strings.Contains(strings.ToLower(owner), "otw") {
+				found = true
+				c.IndentedJSON(200, map[string]interface{}{
+					"license_plate": licensePlate,
+					"link":          "https://www.zone01.be/hercules/" + link,
+				})
+				return false
+			}
+			for j := 0; j < len(BAD_OWNERS); j++ {
+				if strings.Contains(strings.ToLower(owner), strings.ToLower(BAD_OWNERS[j])) {
+					return true // Bus belongs to a company which we know does not contract for OTW.
+				}
+			}
+			found = true
 			c.IndentedJSON(200, map[string]interface{}{
 				"license_plate": licensePlate,
 				"link":          "https://www.zone01.be/hercules/" + link,
 			})
 			return false
-		}
-		//if at end of array then abort with 404
-		if totalLen == i+1 {
-			c.AbortWithStatus(404)
-			return false
-		}
-		return true
+		})
+		return !found
 	})
 }
 
